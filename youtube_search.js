@@ -1,7 +1,7 @@
 const { google } = require('googleapis');
 const youtube = google.youtube('v3');
 
-const API_KEY = 'AIzaSyAO1r24hCnvgU257_-iawggzY63c8_GelI';
+const API_KEY = 'API KEY';
 
 
 async function searchYouTube(query) {
