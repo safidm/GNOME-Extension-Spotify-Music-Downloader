@@ -15,7 +15,8 @@ const Indicator = GObject.registerClass(
         _init() {
             super._init(0.0, _('My Shiny Indicator'));
 
-            let iconPath = "/home/safidmusabbir/Documents/MusicPlaylistPC/Icon/music_icon.png";
+            //Setting up the icon in the taskbar
+            let iconPath = "/home/user/Documents/MusicPlaylistPC/Icon/music_icon.png";
             let gicon = Gio.icon_new_for_string(`${iconPath}`);
             let icon = new St.Icon({ gicon: gicon, style_class: 'system-status-icon', icon_size: 16 });
             this.add_child(icon);
@@ -29,13 +30,13 @@ const Indicator = GObject.registerClass(
         }
 
         downloadCurrentSong() {
+            // Sorting data to get the song name and artist name from terminal
             function getSpotifyMetadata() {
                 let [res, out, err, status] = [];
                 [res, out, err, status] = GLib.spawn_command_line_sync("dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Get string:org.mpris.MediaPlayer2.Player string:Metadata");
                 return parseSpotifyData(out.toString());
             }
-
-            // Sorting data to get the song name and artist name from terminal
+            
             function parseSpotifyData(data) {
                 if (!data) return {title: null, artist: null};
 
@@ -62,16 +63,19 @@ const Indicator = GObject.registerClass(
                 console.log(metadata.title + " by " + metadata.artist);
                 searchYouTube(metadata);
             }
+
+            //Calling for the youtube_search.js which uses Youtube API to get the Youtube URL
             function searchYouTube(metadata) {
-                let command = [`node`, `/home/safidmusabbir/.local/share/gnome-shell/extensions/spotify@download.attempt/youtube_search.js`, `"${metadata.title} ${metadata.artist}"`]
+                let command = [`node`, `/home/user/.local/share/gnome-shell/extensions/spotify@download.attempt/youtube_search.js`, `"${metadata.title} ${metadata.artist}"`]
                 execCommunicate(command).then(out => {
                     console.log("Video URL: " + out)
                     downloadYouTubeAudio(out);
                 })
             }
 
+            //Downloads youtube audio using yt-dlp
             function downloadYouTubeAudio(videoUrl) {
-                let command = [`yt-dlp`, `-x`,`-P`, `home:/home/safidmusabbir/Documents/MusicPlaylistPC`, `-o`, `${metadata.artist.replace(/ /g, '\ ')}\ -\ ${metadata.title.replace(/ /g, '\ ')}`, `-vU`,  `--audio-format`, `mp3`, `${videoUrl}`]
+                let command = [`yt-dlp`, `-x`,`-P`, `home:/home/user/Documents/MusicPlaylistPC`, `-o`, `${metadata.artist.replace(/ /g, '\ ')}\ -\ ${metadata.title.replace(/ /g, '\ ')}`, `-vU`,  `--audio-format`, `mp3`, `${videoUrl}`]
                 execCheck(command).then(out => {
                     console.log(out)
                     console.log("Downloaded")
@@ -81,8 +85,9 @@ const Indicator = GObject.registerClass(
                 })
             }
 
+            //Sends the downloaded file to the android device
             function sendToPhone() {
-                let command2 = [`adb`, `push`, `/home/safidmusabbir/Documents/MusicPlaylistPC/${metadata.artist} - ${metadata.title}.mp3`, `./storage/emulated/0/Download/MusicPlaylist`]
+                let command2 = [`adb`, `push`, `/home/user/Documents/MusicPlaylistPC/${metadata.artist} - ${metadata.title}.mp3`, `./storage/emulated/0/Download/MusicPlaylist`]
                 execCheck(command2).then(out2 => {
                     console.log(out2)
                     console.log("Downloaded and pushed to phone")
