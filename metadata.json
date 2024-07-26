@@ -1,0 +1,8 @@
+{
+  "name": "Spotify Music Downloader",
+  "description": "Downloads selected music from the topbar onto an android device through KDE Connect",
+  "uuid": "spotify@download.attempt",
+  "shell-version": [
+    "46"
+  ]
+}
